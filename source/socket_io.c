@@ -78,6 +78,11 @@ static void SOCKET_prepare( void ) {
 	setgid( 0 );
 #endif
 
+	if( setsockopt( socket_server, SOL_SOCKET, SO_REUSEADDR, &i, sizeof( int ) ) == SOCKET_ERROR ) {
+		wsa_result = WSAGetLastError();
+		printf( "setsockopt( SO_REUSEADDR ) error: %d.\n", wsa_result );
+	}
+
 	if ( bind( socket_server, ( struct sockaddr* )&server_address, sizeof( server_address ) ) == SOCKET_ERROR ) {
 		wsa_result = WSAGetLastError();
 		printf( "bind error: %d.\n", wsa_result );
@@ -98,11 +103,6 @@ static void SOCKET_prepare( void ) {
 	if( setsockopt( socket_server, IPPROTO_TCP, TCP_NODELAY, ( char * )&i, sizeof( i ) ) == SOCKET_ERROR ) {
 		wsa_result = WSAGetLastError();
 		printf( "setsockopt( TCP_NODELAY ) error: %d.\n", wsa_result );
-	}
-
-	if( setsockopt( socket_server, SOL_SOCKET, SO_REUSEADDR, ( char * )&i, sizeof( i ) ) == SOCKET_ERROR ) {
-		wsa_result = WSAGetLastError();
-		printf( "setsockopt( SO_REUSEADDR ) error: %d.\n", wsa_result );
 	}
 
 	if( fcntl( socket_server, F_SETFL, &b ) == SOCKET_ERROR ) {
@@ -209,7 +209,8 @@ void SOCKET_close( int socket_descriptor ) {
 }
 
 void SOCKET_stop( void ) {
-	shutdown( socket_server, SHUT_RDWR );
+	/*shutdown( socket_server, SHUT_RDWR );*/
+	/*close( communication_session_.socket );*/
 	close( communication_session_.socket );
 	close( socket_server );
 
